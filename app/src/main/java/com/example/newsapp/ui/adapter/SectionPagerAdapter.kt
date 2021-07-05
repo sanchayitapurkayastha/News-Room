@@ -8,7 +8,6 @@ class SectionPagerAdapter(manager: FragmentManager) : FragmentPagerAdapter(manag
     private var fragmentList: MutableList<Fragment> = ArrayList()
     private var titleList: MutableList<String> = ArrayList()
 
-
     override fun getCount(): Int {
         return fragmentList.size
     }

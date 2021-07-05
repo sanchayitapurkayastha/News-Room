@@ -8,12 +8,16 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager.widget.ViewPager
 import com.example.newsapp.R
 import com.example.newsapp.ui.adapter.SectionPagerAdapter
+import com.example.newsapp.ui.viewmodel.NewsViewModel
 import com.google.android.material.tabs.TabLayout
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
+
     private lateinit var  v: View
     private lateinit var viewPager: ViewPager
     private lateinit var tabLayout: TabLayout
+
+    private lateinit var viewModel: NewsViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,16 +40,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         setUpViewPager (viewPager)
         tabLayout.setupWithViewPager(viewPager)
-
     }
 
     private fun setUpViewPager(viewPager: ViewPager) {
         val adapter = SectionPagerAdapter (childFragmentManager)
+
         adapter.addFragment(TopNewsFragment(), "Top News")
         adapter.addFragment(BusinessFragment(), "Business")
         adapter.addFragment(HealthFragment(), "Health")
         adapter.addFragment(SportsFragment(), "Sports")
         adapter.addFragment(EntertainmentFragment(), "Entertainment")
+
         viewPager.adapter = adapter
     }
 }

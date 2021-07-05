@@ -1,11 +1,12 @@
-package com.example.newsapp
+package com.example.newsapp.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import com.example.newsapp.ui.NewsActivity
+import com.example.newsapp.R
+import com.example.newsapp.ui.activity.NewsActivity
 
 class SplashScreenActivity : AppCompatActivity() {
 

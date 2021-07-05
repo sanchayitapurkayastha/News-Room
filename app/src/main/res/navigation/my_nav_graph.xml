@@ -54,6 +54,10 @@
         tools:layout="@layout/fragment_article"  app:enterAnim="@anim/slide_in_right"
         app:exitAnim="@anim/slide_out_left"
         app:popEnterAnim="@anim/slide_in_left"
-        app:popExitAnim="@anim/slide_out_right"/>
+        app:popExitAnim="@anim/slide_out_right">
+        <argument
+            android:name="article"
+            app:argType="com.example.newsapp.model.Article" />
+    </fragment>
 
 </navigation>
