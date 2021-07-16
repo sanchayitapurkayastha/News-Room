@@ -13,19 +13,7 @@ interface NewsApiHolder {
         @Query("country")
         country: String,
         @Query("pageSize")
-        pageSize: Int,
-        @Query("apiKey")
-        apiKey : String = API_KEY
-    ): Response<NewsResponse>
-
-    @GET("v2/top-headlines")
-    suspend fun getCategory (
-        @Query("country")
-        country: String,
-        @Query("category")
-        category: String,
-        @Query("pageSize")
-        pageSize: Int,
+        pageSize: Int = 1,
         @Query("apiKey")
         apiKey : String = API_KEY
     ): Response<NewsResponse>

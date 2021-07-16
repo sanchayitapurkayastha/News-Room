@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.newsapp.model.Article
 
-@Database (entities = [Article::class], version = 1, exportSchema = false)
+@Database (entities = [Article::class], version = 1)
 @TypeConverters (Converters::class)
 abstract class ArticlesDatabase : RoomDatabase() {
     abstract fun getArticleDao (): ArticlesDao
@@ -15,8 +15,20 @@ abstract class ArticlesDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: ArticlesDatabase? = null
+        private val LOCK = Any()
 
-        fun getDatabase(context: Context): ArticlesDatabase {
+        operator fun invoke(context: Context?) = INSTANCE ?: synchronized(LOCK) {
+            INSTANCE ?: context?.let { createDatabase (it).also { INSTANCE = it } }
+        }
+
+        private fun createDatabase(context: Context) =
+            Room.databaseBuilder(
+                context.applicationContext,
+                ArticlesDatabase::class.java,
+                "article_database.db"
+            ).build()
+
+        /*private fun getDatabase(context: Context): ArticlesDatabase {
             val tempInstance = INSTANCE
 
             if (tempInstance != null)
@@ -32,6 +44,6 @@ abstract class ArticlesDatabase : RoomDatabase() {
                 INSTANCE = instance
                 return instance
             }
-        }
+        }*/
     }
 }

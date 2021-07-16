@@ -15,7 +15,7 @@
         android:theme="@style/Theme.NewsApp"
         android:allowBackup="true">
 
-        <activity android:name=".activity.SplashScreenActivity"
+        <activity android:name=".ui.activity.SplashScreenActivity"
             android:theme="@style/SplashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

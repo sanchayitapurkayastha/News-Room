@@ -8,14 +8,18 @@ import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.newsapp.R
-import com.example.newsapp.ui.activity.NewsActivity
+import com.example.newsapp.database.ArticlesDatabase
+import com.example.newsapp.repository.NewsRepository
 import com.example.newsapp.ui.adapter.NewsAdapter
 import com.example.newsapp.ui.viewmodel.NewsViewModel
+import com.example.newsapp.ui.viewmodel.NewsViewModelProviderFactory
 import com.example.newsapp.util.Constants
+import com.example.newsapp.util.NewsApplication
 import com.example.newsapp.util.Resource
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.coroutines.Job
@@ -28,6 +32,10 @@ SearchFragment : Fragment(R.layout.fragment_search) {
     private lateinit var viewModel: NewsViewModel
     private lateinit var newsAdapter: NewsAdapter
 
+    var isLoading = false
+    var isLastPage = false
+    var isScrolling = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,7 +46,18 @@ SearchFragment : Fragment(R.layout.fragment_search) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = (activity as NewsActivity).viewModel
+
+        val newsRepository = ArticlesDatabase(context)?.let { NewsRepository(it) }
+        val appCtx : NewsApplication = activity?.application as NewsApplication
+        val viewModelProviderFactory = newsRepository?.let {
+            NewsViewModelProviderFactory(appCtx, it)
+        }
+        viewModel = viewModelProviderFactory?.let {
+            ViewModelProvider(requireActivity(),
+                it
+            ).get(NewsViewModel::class.java)
+        }!!
+
         setRecyclerView()
 
         newsAdapter.setOnItemClickListener {
@@ -59,35 +78,41 @@ SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
-        viewModel.search.observe(viewLifecycleOwner, { response->
-            when (response) {
-                is Resource.Success -> {
-                    isLoading = false
-                    response.data?.let {newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles.toList())
-                        val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
-                        isLastPage = viewModel.searchPage == totalPages
-                        if(isLastPage)
-                            recycle_search.setPadding(0, 0, 0, 0)
+        search_button.setOnClickListener {
+            viewModel.search.observe(viewLifecycleOwner, { response ->
+                when (response) {
 
+                    is Resource.Success -> {
+                        isLoading = false
+                        response.data?.let { newsResponse ->
+                            newsAdapter.differ.submitList(newsResponse.articles.toList())
+                            val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
+                            isLastPage = viewModel.searchPage == totalPages
+                            if (isLastPage)
+                                recycle_search.setPadding(0, 0, 0, 0)
+
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        isLoading = false
+                        response.message?.let { message ->
+                            Toast.makeText(
+                                activity,
+                                "An error occured: $message",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    is Resource.Loading -> {
+                        isLoading = true
                     }
                 }
-                is Resource.Error -> {
-                    isLoading = false
-                    response.message?.let { message ->
-                        Toast.makeText(activity,"An error occured: $message", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                is Resource.Loading -> {
-                    isLoading = true
-                }
-            }
-        })
+            })
+        }
+
     }
-
-    var isLoading = false
-    var isLastPage = false
-    var isScrolling = false
 
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -98,6 +123,7 @@ SearchFragment : Fragment(R.layout.fragment_search) {
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
+
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
             val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
             val visibleItemCount = layoutManager.childCount
@@ -109,6 +135,7 @@ SearchFragment : Fragment(R.layout.fragment_search) {
             val isTotalMorethanVisible = totalItems >= Constants.QUERY_PAGE_SIZE
             val paginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotFirst
                     && isTotalMorethanVisible && isScrolling
+
             if (paginate) {
                 viewModel.searchNews (search_bar.text.toString())
                 isScrolling = false
