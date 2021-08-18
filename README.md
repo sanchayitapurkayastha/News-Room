@@ -2,7 +2,7 @@
 
 News Room is a simple, easy-to use news app, which uses [NewsAPI](www.newsapi.org) to fetch top news headlines from the API. 
 It has user-friendly UI and also its easy to use features makes it a very popular android project.
-News App is written in Kotlin and uses the new Architecture Components and Guidelines announced by Google.
+News Room is written in Kotlin and uses the new Architecture Components and Guidelines announced by Google.
 
 ## Components Used
 - [NavHostFragment](https://developer.android.com/reference/androidx/navigation/fragment/NavHostFragment)
